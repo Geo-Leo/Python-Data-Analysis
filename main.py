@@ -2,7 +2,7 @@
 # Created Date: 10/20/22
 # version = '4.0'
 # ------------------------------------------------------------------
-''' Preliminary data analysis using Python for GIS project'''
+'''Preliminary data analysis using Python for GIS project'''
 
 # read a csv file
 import pandas
