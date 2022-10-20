@@ -1,6 +1,6 @@
 # Created By  : Geo-Leo
-# Created Date: 10/19/22
-# version ='3.0'
+# Created Date: 10/20/22
+# version = '4.0'
 # ------------------------------------------------------------------
 ''' Preliminary data analysis using Python for GIS project'''
 
@@ -36,6 +36,7 @@ id = df3['ID']
 # check type of object
 print(type(units))
 
+# print entire dataset
 print(df3.to_string())
 
 # print 5-number summary
@@ -59,7 +60,7 @@ def summary(var1):
 summary(units)
 
 # print mean and standard deviation
-def meanstd(var1) :
+def meanstd(var1):
   import statistics
   mean_units = statistics.mean(var1)
   std_units = statistics.stdev(var1)
@@ -80,6 +81,7 @@ plt.ylabel("Frequency")'''
 #plt.show()
 
 # two scatterplots on same graph
+# using plot.scatter() drops NaN values
 # units <= 8
 filter2 = df['Units'] > 8
 graphdata = df.where(filter2)
@@ -104,6 +106,6 @@ df3['ID']= df['ID'].astype(int)
 print(df3.head())
 
 # save as csv with no index
-''' in order to properly write file, plt.show() must not be 
+'''in order to properly write file, plt.show() must not be 
  ran also or program will continue running as graphs are output'''
 df3.to_csv('file2.csv', index=False)
