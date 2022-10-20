@@ -4,27 +4,26 @@
 # ------------------------------------------------------------------
 ''' Preliminary data analysis using Python for GIS project'''
 
-# reading a csv file
+# read a csv file
 import pandas
 # header row must not already be in string format
 df = pandas.read_csv('SP.csv')
 print(df.head())
 
-# selecting rows using index label
+# select rows using index label
 rows = df.loc[1:4]
 print(rows)
 
-# selecting one column
+# select one column
 units = df['Units']
 print(units)
 
-# removing one column
+# remove one column
 df.pop('Comments')
 
-# filtering using boolean values
+# filter using boolean values
 filter = df['Completion'] == 'Yes'
 
-# filtering data
 # observations that don't satisfy criteria are set to NaN
 df2 = df.where(filter)
 #print(df2)
@@ -34,7 +33,7 @@ df3 = df2.dropna()
 units = df3['Units']
 id = df3['ID']
 
-# checking type of object
+# check type of object
 print(type(units))
 
 print(df3.to_string())
@@ -95,14 +94,16 @@ plt.scatter(graphdata['ID'], graphdata['Units'], color='#9B111E')
 plt.title("Units over time")
 plt.xlabel("Date")
 plt.ylabel("Units")
+# add a legend  
+plt.legend(["<= 8 units", "> 8 units"], loc = "upper right")
 #plt.show()
 
-# recoding ID variable to integer
+# recode ID variable to integer
 # ignore warning
 df3['ID']= df['ID'].astype(int)
 print(df3.head())
 
-# saving as csv with no index
+# save as csv with no index
 ''' in order to properly write file, plt.show() must not be 
  ran also or program will continue running as graphs are output'''
 df3.to_csv('file2.csv', index=False)
