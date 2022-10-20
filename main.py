@@ -1,6 +1,6 @@
 # Created By  : Geo-Leo
 # Created Date: 10/19/22
-# version ='2.0'
+# version ='3.0'
 # ------------------------------------------------------------------
 ''' Preliminary data analysis using Python for GIS project'''
 
@@ -74,18 +74,33 @@ meanstd(units)
 
 # histogram with default blue color
 import matplotlib.pyplot as plt
-plt.hist(units)
+'''plt.hist(units)
 plt.title("Histogram for verified units")
 plt.xlabel("# of units")
-plt.ylabel("Frequency")
+plt.ylabel("Frequency")'''
 #plt.show()
 
+# two scatterplots on same graph
+# units <= 8
+filter2 = df['Units'] > 8
+graphdata = df.where(filter2)
+graphdata2 = df.where(df3['Units'] <= 8)
+plt.scatter(graphdata2['ID'], graphdata2['Units'])
+
+print(filter2)
+
 # scatterplot with ruby red color
-plt.scatter(id, units, color='#9B111E')
+# units > 8
+plt.scatter(graphdata['ID'], graphdata['Units'], color='#9B111E')
 plt.title("Units over time")
 plt.xlabel("Date")
 plt.ylabel("Units")
 #plt.show()
+
+# recoding ID variable to integer
+# ignore warning
+df3['ID']= df['ID'].astype(int)
+print(df3.head())
 
 # saving as csv with no index
 ''' in order to properly write file, plt.show() must not be 
