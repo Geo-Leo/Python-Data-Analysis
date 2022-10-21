@@ -2,7 +2,8 @@
 # Created Date: 10/20/22
 # version = '4.0'
 # ------------------------------------------------------------------
-'''Preliminary data analysis using Python for GIS project'''
+# Preliminary data analysis using Python for GIS project
+# ------------------------------------------------------------------
 
 # read a csv file
 import pandas
@@ -62,13 +63,13 @@ summary(units)
 # print mean and standard deviation
 def meanstd(var1):
   import statistics
-  mean_units = statistics.mean(var1)
-  std_units = statistics.stdev(var1)
+  mean_var1 = statistics.mean(var1)
+  std_var1 = statistics.stdev(var1)
   name = var1.name
   print()
   print(f'Mean and Std for {name}')
-  print(f'Mean: {mean_units:.3f}')
-  print(f'Std: {std_units:.3f}')
+  print(f'Mean: {mean_var1:.3f}')
+  print(f'Std: {std_var1:.3f}')
 
 meanstd(units)
 

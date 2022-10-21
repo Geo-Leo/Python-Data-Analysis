@@ -1,4 +1,5 @@
-# Data-Analysis
-This python script is to provide a preliminary analysis of data for a GIS project.
+# Python Data Analysis
 
-The repository is currently private.
+The python script is to provide a preliminary data analysis for a GIS project.
+
+This repository is currently private.
