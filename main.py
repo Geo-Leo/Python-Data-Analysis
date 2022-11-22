@@ -8,37 +8,37 @@
 # read a csv file
 import pandas
 # header row must not already be in string format
-df = pandas.read_csv('SP.csv')
-print(df.head())
+df = pandas.read_csv('GeneralizedLinearRegression.csv')
+#print(df.head())
 
 # select rows using index label
 rows = df.loc[1:4]
-print(rows)
+#print(rows)
 
 # select one column
-units = df['Units']
-print(units)
+prop_crime = df['2022 Property Crime Index']
+print(prop_crime)
 
 # remove one column
-df.pop('Comments')
+df.pop('SOURCE_ID')
 
 # filter using boolean values
-filter = df['Completion'] == 'Yes'
+#filter = df['Completion'] == 'Yes'
 
 # observations that don't satisfy criteria are set to NaN
-df2 = df.where(filter)
+#df2 = df.where(filter)
 #print(df2)
 
 # remove NaN values
-df3 = df2.dropna()
-units = df3['Units']
-id = df3['ID']
+#df3 = df2.dropna()
+#units = df3['Units']
+#id = df3['ID']
 
 # check type of object
-print(type(units))
+print(type(prop_crime))
 
 # print entire dataset
-print(df3.to_string())
+#print(df.to_string())
 
 # print 5-number summary
 def summary(var1):
@@ -58,7 +58,7 @@ def summary(var1):
   print(f'Q3: {quartiles[2]:.3f}')
   print(f'Max: {data_max:.3f}')
 
-summary(units)
+summary(prop_crime)
 
 # print mean and standard deviation
 def meanstd(var1):
@@ -71,10 +71,26 @@ def meanstd(var1):
   print(f'Mean: {mean_var1:.3f}')
   print(f'Std: {std_var1:.3f}')
 
-meanstd(units)
+meanstd(prop_crime)
+
+
+
+residual = df['Deviance Residual']
+dev = pandas.cut(residual, bins=[-10,-2.5,-1.5,-0.5,0.5,1.5,2.5,10], labels=['-3','-2','-1','0','1','2','3'])
+# adding dev variable to dataframe
+df2 = df.assign(Deviance = dev)
+#print(df2.to_string())
+
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+sns.lmplot(data=df2, y='2022 Property Crime Index', x='2022 Total Population', hue='Deviance', fit_reg=True)
+
+plt.show()
+
 
 # histogram with default blue color
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 '''plt.hist(units)
 plt.title("Histogram for verified units")
 plt.xlabel("# of units")
@@ -84,15 +100,18 @@ plt.ylabel("Frequency")'''
 # two scatterplots on same graph
 # using plot.scatter() drops NaN values
 # units <= 8
+'''
 filter2 = df['Units'] > 8
 graphdata = df.where(filter2)
 graphdata2 = df.where(df3['Units'] <= 8)
-plt.scatter(graphdata2['ID'], graphdata2['Units'])
+'''
+#plt.scatter(prop_crime, df['2022 Total Population'])
 
-print(filter2)
+#print(filter2)
 
 # scatterplot with ruby red color
 # units > 8
+'''
 plt.scatter(graphdata['ID'], graphdata['Units'], color='#9B111E')
 plt.title("Units over time")
 plt.xlabel("Date")
@@ -100,13 +119,13 @@ plt.ylabel("Units")
 # add a legend  
 plt.legend(["<= 8 units", "> 8 units"], loc = "upper right")
 #plt.show()
-
+'''
 # recode ID variable to integer
 # ignore warning
-df3['ID']= df['ID'].astype(int)
-print(df3.head())
+#df3['ID']= df['ID'].astype(int)
+#print(df3.head())
 
 # save as csv with no index
 '''in order to properly write file, plt.show() must not be 
  ran also or program will continue running as graphs are output'''
-df3.to_csv('file2.csv', index=False)
+#df3.to_csv('file2.csv', index=False)
