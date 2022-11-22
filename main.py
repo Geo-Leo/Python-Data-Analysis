@@ -1,6 +1,6 @@
 # Created By  : Geo-Leo
-# Created Date: 10/20/22
-# version = '4.0'
+# Created Date: 11/22/22
+# version = '5.0'
 # ------------------------------------------------------------------
 # Preliminary data analysis using Python for GIS project
 # ------------------------------------------------------------------
@@ -9,36 +9,6 @@
 import pandas
 # header row must not already be in string format
 df = pandas.read_csv('GeneralizedLinearRegression.csv')
-#print(df.head())
-
-# select rows using index label
-rows = df.loc[1:4]
-#print(rows)
-
-# select one column
-prop_crime = df['2022 Property Crime Index']
-print(prop_crime)
-
-# remove one column
-df.pop('SOURCE_ID')
-
-# filter using boolean values
-#filter = df['Completion'] == 'Yes'
-
-# observations that don't satisfy criteria are set to NaN
-#df2 = df.where(filter)
-#print(df2)
-
-# remove NaN values
-#df3 = df2.dropna()
-#units = df3['Units']
-#id = df3['ID']
-
-# check type of object
-print(type(prop_crime))
-
-# print entire dataset
-#print(df.to_string())
 
 # print 5-number summary
 def summary(var1):
@@ -58,74 +28,125 @@ def summary(var1):
   print(f'Q3: {quartiles[2]:.3f}')
   print(f'Max: {data_max:.3f}')
 
-summary(prop_crime)
-
-# print mean and standard deviation
-def meanstd(var1):
-  import statistics
-  mean_var1 = statistics.mean(var1)
-  std_var1 = statistics.stdev(var1)
-  name = var1.name
-  print()
-  print(f'Mean and Std for {name}')
-  print(f'Mean: {mean_var1:.3f}')
-  print(f'Std: {std_var1:.3f}')
-
-meanstd(prop_crime)
+summary(df['Deviance Residual'])
 
 
+import pandas as pd
+from patsy import dmatrices
+import numpy as np
+import statsmodels.api as sm
+import matplotlib.pyplot as plt
+
+crime = df['2022 Property Crime Index']
+pop = df['2022 Total Population']
+inc = df['2022 Median Household Income']
+age = df['2022 Median Age']
+time = df['Travel Time End (Minutes)']
+df2 = df.assign(crime = crime, pop = pop, inc = inc, age = age, time = time)
+
+
+expr = "crime ~ pop + inc + age + time"
+
+#Set up the X and y matrices
+y_mat, x_mat = dmatrices(expr, df2, return_type='dataframe')
+
+#Using the statsmodels GLM class, train the Poisson regression model on the training data set.
+model = sm.GLM(y_mat, x_mat, family=sm.families.Poisson()).fit()
+
+#Print the training summary.
+print(model.summary())
+
+
+
+
+
+
+
+'''
 
 residual = df['Deviance Residual']
-dev = pandas.cut(residual, bins=[-10,-2.5,-1.5,-0.5,0.5,1.5,2.5,10], labels=['-3','-2','-1','0','1','2','3'])
+dev = pandas.cut(residual, bins=[-10, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10], labels=['< -2.5', '(-2.5, -1.5)', '(-1.5, -0.5)', '(-0.5, 0.5)','(0.5, 1.5)', '(1.5, 2.5)', '> 2.5'])
 # adding dev variable to dataframe
 df2 = df.assign(Deviance = dev)
-#print(df2.to_string())
-
 
 import seaborn as sns
 import matplotlib.pyplot as plt
-sns.lmplot(data=df2, y='2022 Property Crime Index', x='2022 Total Population', hue='Deviance', fit_reg=True)
 
+
+# first Scatterplot
+sns.lmplot(data=df2, y='2022 Property Crime Index', x='2022 Total Population', hue='Deviance', palette='coolwarm', fit_reg=False)
+
+import numpy as np
+
+x = df2['2022 Total Population']
+y = df2['2022 Property Crime Index']
+a, b = np.polyfit(x, y, 1)
+#add line of best fit to plot
+plt.plot(x, a * x + b)
 plt.show()
 
 
-# histogram with default blue color
-#import matplotlib.pyplot as plt
-'''plt.hist(units)
-plt.title("Histogram for verified units")
-plt.xlabel("# of units")
-plt.ylabel("Frequency")'''
-#plt.show()
+# second Scatterplot
+sns.lmplot(data=df2, y='2022 Property Crime Index', x='2022 Median Household Income', hue='Deviance', palette='coolwarm', fit_reg=False)
 
-# two scatterplots on same graph
-# using plot.scatter() drops NaN values
-# units <= 8
-'''
-filter2 = df['Units'] > 8
-graphdata = df.where(filter2)
-graphdata2 = df.where(df3['Units'] <= 8)
-'''
-#plt.scatter(prop_crime, df['2022 Total Population'])
+import numpy as np
 
-#print(filter2)
+x = df2['2022 Median Household Income']
+y = df2['2022 Property Crime Index']
+a, b = np.polyfit(x, y, 1)
 
-# scatterplot with ruby red color
-# units > 8
-'''
-plt.scatter(graphdata['ID'], graphdata['Units'], color='#9B111E')
-plt.title("Units over time")
-plt.xlabel("Date")
-plt.ylabel("Units")
-# add a legend  
-plt.legend(["<= 8 units", "> 8 units"], loc = "upper right")
-#plt.show()
-'''
-# recode ID variable to integer
-# ignore warning
-#df3['ID']= df['ID'].astype(int)
-#print(df3.head())
+#add line of best fit to plot
+plt.plot(x, a * x + b)
+plt.show()
 
-# save as csv with no index
-'''in order to properly write file, plt.show() must not be 
- ran also or program will continue running as graphs are output'''
-#df3.to_csv('file2.csv', index=False)
+
+# third Scatterplot
+sns.lmplot(data=df2, y='2022 Property Crime Index', x='2022 Median Age', hue='Deviance', palette='coolwarm', fit_reg=False)
+
+import numpy as np
+
+x = df2['2022 Median Age']
+y = df2['2022 Property Crime Index']
+a, b = np.polyfit(x, y, 1)
+
+#add line of best fit to plot
+plt.plot(x, a * x + b)
+plt.show()
+
+
+# Plot of Residulas vs. Y^
+pop = df2['2022 Total Population']
+inc = df2['2022 Median Household Income']
+age = df2['2022 Median Age']
+time = df2['Travel Time End (Minutes)']
+
+import numpy
+
+crimelog = 6.65613 + -0.000589 * pop + -0.000003 * inc + -0.018098 * age + -0.290719 * time  # Poisson Model
+crimehat = round(numpy.exp(crimelog), 0)
+df3 = df2.assign(Crime_Index_Estimate=crimehat)
+summary(crimehat)
+
+sns.lmplot(data=df3, y='Deviance Residual', x='Crime_Index_Estimate', fit_reg=False)
+
+import numpy as np
+
+x = df3['Crime_Index_Estimate']
+y = df3['Deviance Residual']
+a, b = np.polyfit(x, y, 1)
+
+#add line of best fit to plot
+plt.plot(x, a * x + b)
+plt.show()
+
+
+# histogram of Residuals
+import matplotlib.pyplot as plt
+
+Residuals = df2['Deviance Residual']
+plt.hist(Residuals, edgecolor='red', bins=6)
+plt.title("Histogram of Residuals")
+plt.xlabel("Deviance from estimate")
+plt.ylabel("Frequency")
+plt.show()
+'''
