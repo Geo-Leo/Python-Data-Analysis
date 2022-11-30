@@ -20,6 +20,7 @@ def summary(var1):
   # name method is only valid for pandas series object
   # it is the column name
   name = var1.name
+  if name == None: name = 'variable'
   print()
   print(f'Summary of {name}')
   print(f'Min: {data_min:.3f}')
@@ -39,7 +40,7 @@ import matplotlib.pyplot as plt
 
 crime = df['2022 Property Crime Index']
 pop = df['2022 Total Population']
-inc = df['2022 Median Household Income'] / 1000
+inc = df['2022 Median Household Income']
 age = df['2022 Median Age']
 time_police = df['Minutes to Police']
 time_firedept = df['Minutes to Fire Department']
@@ -64,6 +65,7 @@ plt.axis('off')
 #plt.tight_layout()
 plt.savefig('output.png')
 #print(model.summary())
+summary(model.resid_deviance)
 
 
 residual = df['Deviance Residual']
@@ -72,11 +74,14 @@ dev = pandas.cut(residual, bins=[-10, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10], labe
 df2 = df.assign(Deviance = dev)
 #print(df2.to_string())
 
+
+'''
 # adding income / 1000
 income = inc
 df2 = df2.assign(Income = income)
 df2.drop(['2022 Median Household Income'],axis=1, inplace=True)
 df2 = df2.rename({"Income": '2022 Median Household Income'}, axis='columns')
+'''
 import seaborn as sns
 import matplotlib.pyplot as plt
 #print(df2.to_string())
@@ -139,7 +144,31 @@ crime_log = 7.696369 + -0.000554 * pop + -0.000003 * inc + -0.042893 * age + -0.
 crime_est = round(numpy.exp(crime_log), 0)
 df3 = df2.assign(Crime_Index_Estimate = crime_est)
 df3 = df3.rename({'Crime_Index_Estimate': 'Crime Index Estimate'}, axis='columns')
-summary(crime_est)
+
+# important to note that 'Deviance Residual' is not Y - Y^ in a GLM
+#summary(crime - crime_est)
+
+crime_estraw = numpy.exp(crime_log)
+dev1 = 2 * ( crime * numpy.log( (crime / crime_est) ) - (crime - crime_est) )
+
+res = crime - crime_est
+dev_calc = numpy.sign(res) * numpy.sqrt(dev1)
+'''
+dev_calc = []
+for i in range(len(res)):
+  if res[i] > 0:
+    dev_calc.append(numpy.sqrt(dev1[i]))
+  elif res[i] == 0:
+        dev_calc.append(0)
+  else:
+    dev_calc.append(-1 * numpy.sqrt(dev1[i]))
+dev_calc = pd.DataFrame(dev_calc)
+'''
+#print(dev_calc, df3['Deviance Residual'])
+
+summary(df3["Crime Index Estimate"])
+summary(df3['2022 Property Crime Index'])
+
 #print(df3.to_string())
 
 
@@ -166,7 +195,7 @@ from scipy.stats import norm
 import matplotlib.pyplot as plt
 import scipy.stats as stats
 
-data = np.random.normal(-0.162, 3.447, 250)
+data = np.random.normal(-0.162, 3.447, 1000)
 mu, std = norm.fit(data) 
 
 # Plot the PDF.
