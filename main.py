@@ -39,40 +39,53 @@ import matplotlib.pyplot as plt
 
 crime = df['2022 Property Crime Index']
 pop = df['2022 Total Population']
-inc = df['2022 Median Household Income']
+inc = df['2022 Median Household Income'] / 1000
 age = df['2022 Median Age']
-time = df['Travel Time End (Minutes)']
-df2 = df.assign(crime = crime, pop = pop, inc = inc, age = age, time = time)
+time_police = df['Minutes to Police']
+time_firedept = df['Minutes to Fire Department']
+time_freeway = df['Minutes to Freeway']
+
+df2 = df.assign(Crime_Index = crime, Population = pop, HH_Income = inc, Age = age, Travel_Time_Police = time_police, Travel_Time_Firedept = time_firedept, Travel_Time_Freeway = time_freeway)
 
 
-expr = "crime ~ pop + inc + age + time"
+expr = "Crime_Index ~ Population + HH_Income + Age + Travel_Time_Police + Travel_Time_Firedept + Travel_Time_Freeway"
 
 #Set up the X and y matrices
 y_mat, x_mat = dmatrices(expr, df2, return_type='dataframe')
 
-#Using the statsmodels GLM class, train the Poisson regression model on the training data set.
+#Using the statsmodels GLM class
 model = sm.GLM(y_mat, x_mat, family=sm.families.Poisson()).fit()
 
-#Print the training summary.
-print(model.summary())
+#Print the summary
+import matplotlib.pyplot as plt
+plt.rc('figure', figsize=(11.9, 6))
+plt.text(0.01, 0.05, str(model.summary()), {'fontsize': 12}, fontproperties = 'monospace') 
+plt.axis('off')
+#plt.tight_layout()
+plt.savefig('output.png')
+#print(model.summary())
 
 
+residual = df['Deviance Residual']
+dev = pandas.cut(residual, bins=[-10, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10], labels=['< -2.5', '-2.5 - -1.5', '-1.5 - -0.5', '-0.5 - 0.5','0.5 - 1.5', '1.5 - 2.5', '> 2.5'])
+# adding dev variable to dataframe
+df2 = df.assign(Deviance = dev)
+#print(df2.to_string())
+
+# adding income / 1000
+income = inc
+df2 = df2.assign(Income = income)
+df2.drop(['2022 Median Household Income'],axis=1, inplace=True)
+df2 = df2.rename({"Income": '2022 Median Household Income'}, axis='columns')
+import seaborn as sns
+import matplotlib.pyplot as plt
+#print(df2.to_string())
 
 
 
 
 
 '''
-
-residual = df['Deviance Residual']
-dev = pandas.cut(residual, bins=[-10, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 10], labels=['< -2.5', '(-2.5, -1.5)', '(-1.5, -0.5)', '(-0.5, 0.5)','(0.5, 1.5)', '(1.5, 2.5)', '> 2.5'])
-# adding dev variable to dataframe
-df2 = df.assign(Deviance = dev)
-
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-
 # first Scatterplot
 sns.lmplot(data=df2, y='2022 Property Crime Index', x='2022 Total Population', hue='Deviance', palette='coolwarm', fit_reg=False)
 
@@ -112,41 +125,72 @@ a, b = np.polyfit(x, y, 1)
 #add line of best fit to plot
 plt.plot(x, a * x + b)
 plt.show()
+'''
+
+
 
 
 # Plot of Residulas vs. Y^
-pop = df2['2022 Total Population']
-inc = df2['2022 Median Household Income']
-age = df2['2022 Median Age']
-time = df2['Travel Time End (Minutes)']
+expr = "Crime_Index ~ Population + HH_Income + Age + Travel_Time_Police + Travel_Time_Firedept + Travel_Time_Freeway"
 
 import numpy
+# Poisson Model
+crime_log = 7.696369 + -0.000554 * pop + -0.000003 * inc + -0.042893 * age + -0.294963 * time_police + -0.220129 * time_firedept + 0.182358 * time_freeway 
+crime_est = round(numpy.exp(crime_log), 0)
+df3 = df2.assign(Crime_Index_Estimate = crime_est)
+df3 = df3.rename({'Crime_Index_Estimate': 'Crime Index Estimate'}, axis='columns')
+summary(crime_est)
+#print(df3.to_string())
 
-crimelog = 6.65613 + -0.000589 * pop + -0.000003 * inc + -0.018098 * age + -0.290719 * time  # Poisson Model
-crimehat = round(numpy.exp(crimelog), 0)
-df3 = df2.assign(Crime_Index_Estimate=crimehat)
-summary(crimehat)
 
-sns.lmplot(data=df3, y='Deviance Residual', x='Crime_Index_Estimate', fit_reg=False)
+sns.lmplot(data=df3, y='Deviance Residual', x='Crime Index Estimate', hue='Deviance', palette='coolwarm', fit_reg=False)
+#ax = plt.gca()
+plt.subplots_adjust(top=0.93)
+plt.title("Deviance Residual VS. Predicted")
+
+plt.savefig('Deviance vs predicted.png')
+
+
+            
+# histogram of Residuals
+plt.clf() 
+import matplotlib.pyplot as plt
+Residuals = df2['Deviance Residual']
+plt.hist(Residuals, edgecolor='red', bins=8)
+#plt.title("Distribution of Deviance Residual")
+plt.xlabel("Deviance Residual")
+plt.ylabel("Count")
 
 import numpy as np
-
-x = df3['Crime_Index_Estimate']
-y = df3['Deviance Residual']
-a, b = np.polyfit(x, y, 1)
-
-#add line of best fit to plot
-plt.plot(x, a * x + b)
-plt.show()
-
-
-# histogram of Residuals
+from scipy.stats import norm
 import matplotlib.pyplot as plt
+import scipy.stats as stats
 
-Residuals = df2['Deviance Residual']
-plt.hist(Residuals, edgecolor='red', bins=6)
-plt.title("Histogram of Residuals")
-plt.xlabel("Deviance from estimate")
-plt.ylabel("Frequency")
-plt.show()
+data = np.random.normal(-0.162, 3.447, 250)
+mu, std = norm.fit(data) 
+
+# Plot the PDF.
+xmin, xmax = plt.xlim()
+x = np.linspace(xmin, xmax, 100)
+p = 68.8 * norm.pdf(x, mu, std)
+plt.plot(x, p, 'k', linewidth=2)
+plt.legend(["Normal\nDistribution"], loc = "upper left")
+#plt.tight_layout()
+plt.subplots_adjust(top=0.89)
+plt.suptitle("Distribution of Deviance Residual")
+plt.title("mean = -0.162")
+
+plt.savefig('Histogram residuals.png')
+
+
+
+'''
+df2.drop(['OBJECTID', 'SOURCE_ID', 'Raw Predicted (CRMCYPROC)', 'Predicted (CRMCYPROC)', 'Deviance Residual', 'Shape__Area', 'Shape__Length'],axis=1, inplace=True)
+df3 = df2.drop(['Minutes to Police', 'Minutes to Fire Department', 'Minutes to Freeway'],axis=1, inplace=False)
+
+facet = sns.pairplot(df3)
+facet.fig.subplots_adjust(top=0.93) # adjust the Figure in rp
+facet.fig.suptitle('Relationships between Variables', font=16)
+
+plt.savefig('Scatterplot matrix.png')
 '''
