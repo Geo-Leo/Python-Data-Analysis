@@ -114,7 +114,7 @@ print(df3['Deviance Residual'].head())
 sns.lmplot(data=df3, y='Deviance Residual', x='Crime Index Estimate', hue='Deviance', palette='coolwarm', fit_reg=False)
 plt.subplots_adjust(top=0.93)
 plt.title("Deviance Residual VS. Predicted")
-plt.savefig('Deviance vs predicted.png')
+plt.savefig('Deviance vs predicted.svg')
 
       
 # histogram of Residuals
@@ -145,7 +145,7 @@ plt.legend(["Normal\nDistribution", 'mean'], loc = "upper left")
 plt.subplots_adjust(top=0.89)
 plt.suptitle("Distribution of Deviance Residual")
 plt.title("mean = -0.162")
-plt.savefig('Histogram residuals.png')
+plt.savefig('Histogram residuals.svg')
 
 
 '''
@@ -157,5 +157,70 @@ df3 = df2.drop(['Minutes to Police', 'Minutes to Fire Department', 'Minutes to F
 scatter = sns.pairplot(df2)
 plt.subplots_adjust(top=0.93)
 plt.suptitle('Relationships between Variables', fontsize = 16)
-plt.savefig('Scatterplot matrix.png')
+plt.savefig('Scatterplot matrix.svg')
 '''
+
+# first Scatterplot
+sns.lmplot(data=df2, y='2022 Property Crime Index', x='2022 Total Population', hue='Deviance', palette='coolwarm', fit_reg=False)
+
+import numpy as np
+x = df2['2022 Total Population']
+y = df2['2022 Property Crime Index']
+a, b = np.polyfit(x, y, 1)
+#add line of best fit to plot
+plt.plot(x, a*x+b)
+
+import statsmodels.api as sm 
+model = sm.OLS(y, x)
+results = model.fit()
+print(results.rsquared)
+
+plt.subplots_adjust(top=0.89)
+plt.suptitle('Fitted line plot: crime and population')
+plt.title('R^2 = 0.273')
+plt.savefig('Scatterplot1.svg')
+
+
+# second Scatterplot
+sns.lmplot(data=df2, y='2022 Property Crime Index', x='2022 Median Household Income', hue='Deviance', palette='coolwarm', fit_reg=False)
+
+import numpy as np
+x = df2['2022 Median Household Income']
+y = df2['2022 Property Crime Index']
+a, b = np.polyfit(x, y, 1)
+#add line of best fit to plot
+plt.plot(x, a*x+b)
+
+import statsmodels.api as sm 
+model = sm.OLS(y, x)
+results = model.fit()
+print(results.rsquared)
+
+plt.subplots_adjust(top=0.89)
+plt.suptitle('Fitted line plot: crime and income')
+plt.title('R^2 = 0.584')
+plt.savefig('Scatterplot2.svg')
+
+
+
+# third Scatterplot
+sns.lmplot(data=df2, y='2022 Property Crime Index', x='2022 Median Age', hue='Deviance', palette='coolwarm', fit_reg=False)
+
+import numpy as np
+x = df2['2022 Median Age']
+y = df2['2022 Property Crime Index']
+a, b = np.polyfit(x, y, 1)
+#add line of best fit to plot
+plt.plot(x, a*x+b)
+
+import statsmodels.api as sm 
+model = sm.OLS(y, x)
+results = model.fit()
+print(results.rsquared)
+
+plt.subplots_adjust(top=0.89)
+plt.suptitle('Fitted line plot: crime and age')
+plt.title('R^2 = 0.728')
+plt.savefig('Scatterplot3.svg')
+
+
