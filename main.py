@@ -62,7 +62,7 @@ import matplotlib.pyplot as plt
 plt.rc('figure', figsize=(11.9, 6))
 plt.text(0.01, 0.05, str(model.summary()), {'fontsize': 12}, fontproperties = 'monospace') 
 plt.axis('off')
-plt.savefig('output.png')
+plt.savefig('model.svg')
 #print(model.aic)
 summary(model.resid_deviance)
 
@@ -173,11 +173,11 @@ plt.plot(x, a*x+b)
 import statsmodels.api as sm 
 model = sm.OLS(y, x)
 results = model.fit()
-print(results.rsquared)
+r2 = results.rsquared
 
 plt.subplots_adjust(top=0.89)
 plt.suptitle('Fitted line plot: crime and population')
-plt.title('R^2 = 0.273')
+plt.title(f'R^2 = {r2:.3f}')
 plt.savefig('Scatterplot1.svg')
 
 
@@ -194,11 +194,11 @@ plt.plot(x, a*x+b)
 import statsmodels.api as sm 
 model = sm.OLS(y, x)
 results = model.fit()
-print(results.rsquared)
+r2 = results.rsquared
 
 plt.subplots_adjust(top=0.89)
 plt.suptitle('Fitted line plot: crime and income')
-plt.title('R^2 = 0.584')
+plt.title(f'R^2 = {r2:.3f}')
 plt.savefig('Scatterplot2.svg')
 
 
@@ -216,11 +216,11 @@ plt.plot(x, a*x+b)
 import statsmodels.api as sm 
 model = sm.OLS(y, x)
 results = model.fit()
-print(results.rsquared)
+r2 = results.rsquared
 
 plt.subplots_adjust(top=0.89)
 plt.suptitle('Fitted line plot: crime and age')
-plt.title('R^2 = 0.728')
+plt.title(f'R^2 = {r2:.3f}')
 plt.savefig('Scatterplot3.svg')
 
 
